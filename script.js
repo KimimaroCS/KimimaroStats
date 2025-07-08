@@ -1,7 +1,8 @@
-const API_KEY = "5904cfe3-86d7-479f-9773-7ad94405d1d0";
-const PSEUDO = "--Kimimaro--";
+const API_KEY = "5904cfe3-86d7-479f-9773-7ad94405d1d0"; // ta clé API Faceit
+const PSEUDO = "--Kimimaro--"; // ton pseudo Faceit
 const CONTAINER = document.getElementById("matches");
 
+// 🔍 Récupère l’ID du joueur
 async function getPlayerId(nickname) {
   const res = await fetch(`https://open.faceit.com/data/v4/players?nickname=${encodeURIComponent(nickname)}`, {
     headers: { Authorization: `Bearer ${API_KEY}` }
@@ -15,6 +16,7 @@ async function getPlayerId(nickname) {
   return data.player_id;
 }
 
+// 📜 Récupère la liste des 30 derniers matchs
 async function getMatches(playerId) {
   const res = await fetch(`https://open.faceit.com/data/v4/players/${playerId}/history?game=cs2&limit=30`, {
     headers: { Authorization: `Bearer ${API_KEY}` }
@@ -28,6 +30,7 @@ async function getMatches(playerId) {
   return data.items;
 }
 
+// 🎯 Affiche les matchs dans la page
 async function displayMatches() {
   CONTAINER.innerHTML = "Chargement...";
 
@@ -50,10 +53,10 @@ async function displayMatches() {
       const timestamp = match.created_at || 0;
       const date = new Date(timestamp * 1000).toLocaleString("fr-FR");
 
-      // Map (si dispo)
+      // Map
       const map = match?.stats?.map || match?.stats?.Map || "Inconnue";
 
-      // Résultat (si dispo)
+      // Résultat
       const teams = match?.teams;
       let resultat = "❓ Inconnu";
 
