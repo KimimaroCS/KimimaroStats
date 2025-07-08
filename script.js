@@ -42,27 +42,46 @@ async function displayMatches() {
 
     CONTAINER.innerHTML = "";
 
-    matches.forEach(match => {
+    for (const match of matches) {
       const div = document.createElement("div");
       div.classList.add("match");
 
-      const date = new Date(match.created_at * 1000).toLocaleString("fr-FR");
-      const map = match.stats?.Map || "Inconnue";
-      const score = match.results?.score || "N/A";
-      const winner = match.teams?.faction1?.players?.some(p => p.nickname === PSEUDO)
-        ? match.teams.faction1?.team_stats?.TeamWin || "?"
-        : match.teams.faction2?.team_stats?.TeamWin || "?";
+      // Date du match
+      const timestamp = match.created_at || 0;
+      const date = new Date(timestamp * 1000).toLocaleString("fr-FR");
+
+      // Map (si dispo)
+      const map = match?.stats?.map || match?.stats?.Map || "Inconnue";
+
+      // Résultat (si dispo)
+      const teams = match?.teams;
+      let resultat = "❓ Inconnu";
+
+      if (teams?.faction1 && teams?.faction2) {
+        const f1 = teams.faction1;
+        const f2 = teams.faction2;
+
+        const isInF1 = f1.players.some(p => p.nickname === PSEUDO);
+        const winF1 = f1.team_stats?.TeamWin === "1";
+        const winF2 = f2.team_stats?.TeamWin === "1";
+
+        if (isInF1) {
+          resultat = winF1 ? "✅ Victoire" : "❌ Défaite";
+        } else {
+          resultat = winF2 ? "✅ Victoire" : "❌ Défaite";
+        }
+      }
 
       div.innerHTML = `
-        <h3>${match.match_id}</h3>
+        <h3>ID Match : ${match.match_id}</h3>
         <p><strong>Carte :</strong> ${map}</p>
         <p><strong>Date :</strong> ${date}</p>
-        <p><strong>Score :</strong> ${score}</p>
-        <p><strong>Résultat :</strong> ${winner === "1" ? "✅ Victoire" : "❌ Défaite"}</p>
+        <p><strong>Score :</strong> Non dispo dans cet endpoint</p>
+        <p><strong>Résultat :</strong> ${resultat}</p>
       `;
 
       CONTAINER.appendChild(div);
-    });
+    }
   } catch (error) {
     console.error(error);
     CONTAINER.innerHTML = `❌ Une erreur est survenue : ${error.message}`;
